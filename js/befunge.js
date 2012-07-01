@@ -13,14 +13,9 @@
 			InputArea	: "#befungeInputArea"
 		};
 
-		// ajax setting
-		var AjaxConnection = {
-			requestURL : "base.php",
-		}
-		
 		// code settings
 		var Code = {
-			runDelay : 10, // millisecconds, use "setTimeout"
+			runDelay : 100, // millisecconds, use "setTimeout"
 		};
 		
 		///////////////////////////////////
@@ -107,39 +102,6 @@
 			},
 		};
 		
-		// store texts.
-		var OutputBuffer = {
-			str : "",
-			Clear : function() {
-				str = "";
-			},
-			Add : function(val) {
-				str += val;
-			},
-			Get : function() {
-				return str;
-			},
-			PipeResult : function() {
-				Result.Add(str);
-			}
-		};
-		
-		// ajax data
-		AjaxConnection = $.extend(AjaxConnection, {
-			username : "",
-			Send : function(method, data, func) {
-				var d = data;
-				d.user = this.username;
-				$.ajax({
-					url : this.requestURL,
-					type : method,
-					data : d,
-					dataType : "text",
-					success: func,
-				});					
-			},
-		});
-		
 		// management befunge code
 		Code = $.extend(Code, {
 			direction 	: 6,
@@ -178,8 +140,7 @@
 			Init : function() {
 				Stack.Clear();
 				Result.Clear();
-				InputBuffer.Clear();
-				OutputBuffer.Clear();
+				InputBuffer.pos = 0;
 				this.direction = 6;
 				this.pos = [0,0];
 				this.c = '';
@@ -227,6 +188,10 @@
 					} else {
 						this.Next();
 						this.strings = false;
+					}
+					if($(BefungeElements.RunCode + " tr:eq(" + this.pos[1]  + ") td:eq(" + this.pos[0] + ")").hasClass("break")) {
+						this.BreakPoint();
+						return false;
 					}
 					return true;
 				}
@@ -350,81 +315,7 @@
 					case '@':
 						return false;
 						break;
-					
-					////////////////////////////////////////////
-					// extend
-					////////////////////////////////////////////
-					// "O"utputBuffer
-					//   stack pop one -> to ASCII -> add outbut buffer
-					case 'O':
-						OutputBuffer.Add(String.fromCharCode(Stack.Pop()));
-						break;
-					
-					// "L"ogin
-					//   clear InputBuf ->
-					//   -> stack pop ALL -> to ASCII -> HTTP POST ->
-					//   -> get response -> stack push 255
-					case 'L':
-						InputBuffer.Clear();
-						var c, str="";
-						while((c = Stack.Pop()) != 0) {
-							str += String.fromCharCode(c);
-						}
-						AjaxConnection.username = str;
-						AjaxConnection.Send("post", {"login" : str}, function(data){
-							InputBuffer.EnableBox();
-							InputBuffer.Prompt("InputCommand");
-							Stack.Push(1);
-						});
-						break;
-						
-					// "G"et chat log
-					case 'G':
-						InputBuffer.DisableBox();
-						InputBuffer.Clear();
-						AjaxConnection.Send("get", {'list':true}, function(data){
-							InputBuffer.Set(data);
-							Stack.Push(128);
-							Stack.Push(256);
-						});
-						break;
-						
-					// "M"essage
-					case 'M':
-						InputBuffer.Clear();
-						InputBuffer.EnableBox();
-						InputBuffer.Prompt("InputText");
-						Stack.Push(64);
-						Stack.Push(256);						
-						break;
 
-					// "S"end msg
-					case 'S':
-						InputBuffer.Clear();
-						var c, str="";
-						while((c = Stack.Pop()) != 0) {
-							str += String.fromCharCode(c);
-						}
-						console.log(str);
-						
-						AjaxConnection.Send("post", {"msg" : str}, function(data){
-							Stack.Push(256);
-						});
-						break;
-						
-					// "Prompt"
-					case 'P':
-						var c, str="";
-						while((c = Stack.Pop()) != 0) {
-							str += String.fromCharCode(c);
-						}
-						InputBuffer.Clear();
-						InputBuffer.Prompt(str);
-						InputBuffer.EnableBox();
-						console.log(str);
-						break;
-
-					////////////////////////////////////////////
 					default:
 						break;
 				}
@@ -450,9 +341,8 @@
 			
 			Stop : function(abord) {
 				clearTimeout(this.nowTimeout);
-				if(abord) {
-					this.Start(true);
-				}
+				if(abord)
+					this.running = false;
 			},
 		});
 		
@@ -464,7 +354,7 @@
 			$("head:first").append(
 				'<style>' +
 					'\n ' + BefungeElements.Code +
-						' {float:left; width:50%; height:300px; display:none;}' +
+						' {float:left; width:100%; height:300px;}' +
 					'\n ' + BefungeElements.RunCode +
 						' {float:left; border-collapse: collapse;}' +
 					'\n ' + BefungeElements.RunCode + ' td' +
@@ -477,16 +367,18 @@
 						' {background-color: #DEC3C9;}' +
 					'\n ' + BefungeElements.Stack +
 						' {overflow:hidden; float:left; padding:5px; border:1px solid black; width:100px; height:300px;}' +
+					'\n ' + BefungeElements.Result +
+						' {margin-bottom:30px;}' +
 					'\n ' + BefungeElements.Input +
 						' {width:300px;}' +
 					'\n ' + BefungeElements.InputArea +
-						' {display:none;}' +
+						' {}' +
 				'\n</style>'
 			);
 			
 			// set tags
 			element.html("");
-			var txtBox = $("<input type='text' id='" + BefungeElements.Input.substr(1) + "' value='abc'>");
+			var txtBox = $("<input type='text' id='" + BefungeElements.Input.substr(1) + "'>");
 			var btSend = $("<input type='button' value='Run'>");
 			var btStep = $("<input type='button' value='Step'>");
 			var btPause = $("<input type='button' value='Pause'>");
@@ -494,53 +386,31 @@
 			
 			// add events
 			btSend.click(function(){
-			
-				// return when non buffer
-				if(InputBuffer.Get(true) == 0 || InputBuffer.Get(true).length == 0)
-					return;
-					
-				// Mode: InputCommand
-				if($(this).hasClass("stateInputCommand")) {
-					$(this)
-						.removeClass("stateInputCommand")
-						.addClass("stateInputText");
-					InputBuffer.DisableBox();
-					Stack.Push(1);
-					
-				// Mode: InputName
-				} else if($(this).hasClass("stateInputName")) {
-					$(this)
-						.removeClass("stateInputName")
-						.addClass("stateInputCommand");
-					InputBuffer.DisableBox();
-					Stack.Push(1);
-				
-				// Mode: InputText
-				} else if($(this).hasClass("stateInputText")) {
-					$(this)
-						.removeClass("stateInputText")
-						.addClass("stateInputCommand");
-					Stack.Push(1);
-					
-				// first run
-				} else {
-					InputBuffer.Clear();
-					$(this)
-						.addClass("stateInputName")
-						.val("Send");
-					btStep.attr("disabled", "true");
-					btPause.removeAttr("disabled");
-					btAbord.removeAttr("disabled");
-					$(BefungeElements.InputArea).show();
-					Code.Run();
-				}
-				
-				console.log($(this).attr("class"));
+				btSend.attr("disabled", "true");
+				btStep.removeAttr("disabled");
+				btPause.removeAttr("disabled");
+				btAbord.removeAttr("disabled");
+				InputBuffer.DisableBox();
+				$("html,body").animate({
+					scrollTop: $(BefungeElements.RunCode).offset().top
+				}, 0);
+				Code.Run();
 			});
 			btStep.click(function(){
-				Code.running ? Code.Step() : Code.Start();
+				if(Code.running) {
+					Code.Step();
+				} else {
+					btSend.attr("disabled", "true");
+					btPause.removeAttr("disabled");
+					btAbord.removeAttr("disabled");
+					InputBuffer.DisableBox();
+					$("html,body").animate({
+						scrollTop: $(BefungeElements.RunCode).offset().top
+					}, 0);
+					Code.Start();
+				}
 				btAbord.removeAttr("disabled");
-			}).attr("disabled", "true");;
+			});
 			Code.BreakPoint = function() {
 				Code.Stop();
 				btStep.removeAttr("disabled");
@@ -558,25 +428,27 @@
 			btAbord.click(function(){
 				btPause.click();
 				Code.Stop(true);
-				$(BefungeElements.InputArea).hide();
-				InputBuffer.Set("abc");
 				InputBuffer.EnableBox();
-				InputBuffer.Prompt("YourName");
 				btSend
 					.removeAttr("disabled")
 					.removeClass("stateInputCommand")
 					.removeClass("stateInputName")
-					.removeClass("stateInputText")
-					.val("Run")
-				btStep.attr("disabled", "true");
-				btPause.attr("disabled", "true");
+					.removeClass("stateInputText");
+				//btStep.attr("disabled", "true");
+				btPause
+					.attr("disabled", "true")
+					.val("Pause");
 				btAbord.attr("disabled", "true");
+				InputBuffer.EnableBox();
 			}).attr("disabled", "true");
 			
 			// add tags
 			element
 				.append(
-					$("<span><span>YourName</span></span>")
+					"<textarea id='" + BefungeElements.Code.substr(1) + "'></textarea>"
+				)
+				.append(
+					$("<span><span>Input</span></span>")
 						.append(txtBox)
 						.attr("id", BefungeElements.InputArea.substr(1))
 				)
@@ -589,10 +461,9 @@
 				.append(btAbord)
 				.append(
 					"<br>" +
-					"<textarea id='" + BefungeElements.Code.substr(1) + "'></textarea>" +
 					"<div id='" + BefungeElements.Stack.substr(1) + "'></div>" +
 					"<table id='" + BefungeElements.RunCode.substr(1) + "'></table>" +
-					"<br style='clear:both;width:100%;'>" +
+					"<hr style='clear:both;width:100%;'>" +
 					"<div id='" + BefungeElements.Result.substr(1) + "'></div>"
 				)
 			;
@@ -600,16 +471,5 @@
 		
 		return this; // jQuery method chain
 	};
-
-	// dom ready
-	$(document).ready(function() {
-	
-		// setup
-		$("#testDiv").SetBefunge();
-		
-		// load chat code
-		$("#befungeCode").load("./chat.bf");
-	});
-
 
 })(jQuery);
