@@ -25,21 +25,20 @@
      * @param {string} Befunge Source Codes.
      */
     $jb.Code.prototype.init = function(src){
-        this.source = src.split("\n");
-        
         // init values
         this.Stack.clear();
         this.Result.clear();
         this.InputBuffer.pos = 0;
         this.direction = 6;
         this.pos       = [0,0];
-        this.c         = '';
+        this.c         = "";
         this.lenmax    = 0;
         this.running   = false;
         this.timer     = 0;
         this.strings   = false;
         
         // source setup
+        this.source = src.split("\n");
         for(var i in this.source) {
             if(this.lenmax < this.source[i].length)
                 this.lenmax = this.source[i].length;
@@ -48,6 +47,9 @@
             if(this.lenmax > this.source[i].length)
                 this.source[i] += new Array(this.lenmax - this.source[i].length + 1).join(' ');
         }
+
+        // first command
+        this.c = this.source[0].charAt(0);
     };
     
     /**
@@ -82,11 +84,19 @@
     
     /**
      * Code run
+     * @param {string} Befunge Source
      */
-    $jb.Code.prototype.run = function() {
-        this.Stop();
-        if(!this.running) this.Start(true);
-        this.timer = setInterval(this.step, 50);
+    $jb.Code.prototype.run = function(src, callback) {
+        this.stop();
+        this.init(src);
+        this.running = true;
+        var _this = this;
+        this.timer = setInterval(function() {
+            if(!_this.step()) {
+                if(callback) callback.call(_this, _this);
+                _this.stop();
+            }
+        }, 50);
     };
 
     /**
