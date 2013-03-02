@@ -14,7 +14,7 @@
     /**
      * Clear buffer
      */
-    $jb.InputBuffer.prototype.Clear = function() {
+    $jb.InputBuffer.prototype.clear = function() {
         this.buffer = "";
         this.pos = 0;
     };
@@ -23,7 +23,7 @@
      * Set buffer
      * @param {string} buffer text
      */
-    $jb.InputBuffer.prototype.Set = function(str) {
+    $jb.InputBuffer.prototype.set = function(str) {
         this.buffer = str;
         this.pos = 0;
     };
@@ -32,7 +32,7 @@
      * Add buffer
      * @param {string} buffer text
      */
-    $jb.InputBuffer.prototype.Set = function(str) {
+    $jb.InputBuffer.prototype.add = function(str) {
         this.buffer += str;
         this.pos = 0;
     };
@@ -43,7 +43,7 @@
      *     false : move buffer position
      * @returns {string} front of buffer
      */
-    $jb.InputBuffer.prototype.Get = function(nonMove) {
+    $jb.InputBuffer.prototype.get = function(nonMove) {
         if(this.buffer.length <= this.pos)
             return "";
         var c = this.buffer.charAt(this.pos);
@@ -56,11 +56,11 @@
      * @param {string} buffer text
      * @returns {string} front of buffer
      */
-    $jb.InputBuffer.prototype.GetAll = function() {
+    $jb.InputBuffer.prototype.getAll = function() {
         if(this.stack == null)
             return "";
         var c;
-        while((c = this.Get()) != 0)
+        while((c = this.get()) != 0)
             this.stack.Push(c);
         return c;
     }

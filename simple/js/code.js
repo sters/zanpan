@@ -15,9 +15,9 @@
         this.timer     = null;   // timer object
         this.strings   = false;  // now state = string command?
         
-        this.Stack       = new $jb.Stack;
-        this.Result      = new $jb.Result;
-        this.InputBuffer = new $jb.InputBuffer;
+        this.Stack       = new $jb.Stack();
+        this.Result      = new $jb.Result();
+        this.InputBuffer = new $jb.InputBuffer();
     };
     
     /**
@@ -28,9 +28,9 @@
         this.source = src.split("\n");
         
         // init values
-        this.Stack.init();
-        this.Result.init();
-        this.InputBuffer.init();
+        this.Stack.clear();
+        this.Result.clear();
+        this.InputBuffer.pos = 0;
         this.direction = 6;
         this.pos       = [0,0];
         this.c         = '';
@@ -75,7 +75,7 @@
      */
     $jb.Code.prototype.start = function(reset) {
         if(this.running && !reset) return;
-        this.Init();
+        this.init();
         this.running = true;
     };
     
@@ -111,10 +111,10 @@
         // string command
         if(this.strings) {
             if(this.c != '"') {
-                Stack.Push(this.c.charCodeAt(0));
-                this.Next();
+                this.Stack.push( this.c.charCodeAt(0) );
+                this.next();
             } else {
-                this.Next();
+                this.next();
                 this.strings = false;
             }
             
@@ -147,7 +147,7 @@
                 this.direction = 8;
                 break;
             case '_': case '|':
-                var d = this.Stack.Pop();
+                var d = this.Stack.pop();
                 this.direction = this.c == '_' ? (d == 0 ? 6 : 4) : (d == 0 ? 2 : 8)
                 break;
             case '?':
@@ -159,7 +159,7 @@
             case '3': case '4': case '5':
             case '6': case '7': case '8':
             case '9':
-                this.Stack.Push( parseInt(this.c) );
+                this.Stack.push( parseInt(this.c) );
                 break;
             
             case '"':
@@ -169,18 +169,18 @@
                 
             // user input
             case '&':
-                this.Stack.Push( String.fromCharCode(this.InputBuffer.Get()) );
+                this.Stack.push( String.fromCharCode(this.InputBuffer.get()) );
                 break;
             case '~':
-                this.Stack.Push( this.InputBuffer.Get() );
+                this.Stack.push( this.InputBuffer.get() );
                 break;
                 
             // output    
             case '.':
-                this.Result.Add( this.Stack.Pop() + ' ' );
+                this.Result.add( this.Stack.pop() + ' ' );
                 break;
             case ',':
-                this.Result.Add( String.fromCharCode(this.Stack.Pop()) );
+                this.Result.add( String.fromCharCode(this.Stack.pop()) );
                 break;
                 
             // calc
@@ -189,48 +189,48 @@
             case '*':
             case '/':
             case '%':
-                var a = this.Stack.Pop();
-                var b = this.Stack.Pop();
-                this.Stack.Push( eval("(" + b + ")" + this.c + "(" + a + ")") );
+                var a = this.Stack.pop();
+                var b = this.Stack.pop();
+                this.Stack.push( eval("(" + b + ")" + this.c + "(" + a + ")") );
                 break;
                 
             case '`':
-                var n = this.Stack.Pop();
-                this.Stack.Push( this.Stack.Pop() > n ? 1 : 0 );
+                var n = this.Stack.pop();
+                this.Stack.push( this.Stack.pop() > n ? 1 : 0 );
                 break;
             case '!':
-                this.Stack.Push( this.Stack.Pop() ? 0 : 1 );
+                this.Stack.push( this.Stack.pop() ? 0 : 1 );
                 break;
                 
             // stack
             case ':':
-                var n = this.Stack.Pop();
-                this.Stack.Push(n);
-                this.Stack.Push(n);
+                var n = this.Stack.pop();
+                this.Stack.push(n);
+                this.Stack.push(n);
                 break;
                 
             case "\\":
-                var a = this.Stack.Pop();
-                var b = this.Stack.Pop();
-                this.Stack.Push(a);
-                this.Stack.Push(b);
+                var a = this.Stack.pop();
+                var b = this.Stack.pop();
+                this.Stack.push(a);
+                this.Stack.push(b);
                 break;
                 
             case '$':
-                this.Stack.Pop();
+                this.Stack.pop();
                 break;
                     
             case 'g':
-                var y = this.Stack.Pop();
-                var x = this.Stack.Pop();
+                var y = this.Stack.pop();
+                var x = this.Stack.pop();
                 var v = this.source[y].charCodeAt(x);
-                this.Stack.Push(v);
+                this.Stack.push(v);
                 break;
                 
             case 'p':
-                var y = this.Stack.Pop();
-                var x = this.Stack.Pop();
-                var v = this.Stack.Pop();
+                var y = this.Stack.pop();
+                var x = this.Stack.pop();
+                var v = this.Stack.pop();
                 this.source[y] =
                     this.source[y].substring(0, x)
                     + String.fromCharCode(v)
@@ -250,7 +250,7 @@
             default:
                 break;
         }
-        this.Next();
+        this.next();
         return true;
     };
     
