@@ -1,16 +1,18 @@
 
+var jqBefunge = {};
+
 (function($) {
     
     $.fn.SetBefunge = function() {
         
         // elements
         var BefungeElements = {
-            Code    : "#befungeCode",
-            Input    : "#befungeInput",
-            RunCode    : "#befungeRunCode",
-            Stack    : "#befungeStack",
-            Result    : "#befungeResult",
-            InputArea    : "#befungeInputArea"
+            Code        : "#befungeCode",
+            Input       : "#befungeInput",
+            RunCode     : "#befungeRunCode",
+            Stack       : "#befungeStack",
+            Result      : "#befungeResult",
+            InputArea   : "#befungeInputArea"
         };
         
         // init, add "Befunge" components
@@ -43,6 +45,13 @@
                 '\n</style>'
             );
             
+            // BefungeScripts Deferred Loading
+            var $head = $("head:first");
+            var scripts = ["js/input_buffer.js", "js/result.js", "js/stack.js", "js/code.js"];
+            $.each(scripts, function(i, src) {
+                $.getScript(src);
+            });
+            
             // set tags
             element.html("");
             var txtBox = $("<input type='text' id='" + BefungeElements.Input.substr(1) + "'>");
@@ -57,7 +66,7 @@
                 btStep.removeAttr("disabled");
                 btPause.removeAttr("disabled");
                 btAbord.removeAttr("disabled");
-                InputBuffer.DisableBox();
+                $(BefungeElements.Input).attr("disabled","disabled");
                 $("html,body").animate({
                     scrollTop: $(BefungeElements.RunCode).offset().top
                 }, 0);
@@ -78,11 +87,11 @@
                 }
                 btAbord.removeAttr("disabled");
             });
-            Code.BreakPoint = function() {
+            /*Code.BreakPoint = function() {
                 Code.Stop();
                 btStep.removeAttr("disabled");
                 btPause.val("Resume");
-            };
+            };*/
             btPause.click(function(){
                 if($(this).val() == "Pause") {
                     Code.BreakPoint();
@@ -136,7 +145,7 @@
             ;
         })();
         
-        return this; // jQuery method chain
+        return this; // jqBefunge method chain
     };
     
 })(jQuery);
