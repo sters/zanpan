@@ -71,7 +71,9 @@ var jqBefunge = {};
                 $("html,body").animate({
                     scrollTop: $(BefungeElements.RunCode).offset().top
                 }, 0);
-                (new jqBefunge.Code).run();
+                (new jqBefunge.Code).run( $(BefungeElements.Code).val(), function(code) {
+                    console.log(code.Result.buffer);
+                });
             });
             btStep.click(function(){
                 if(Code.running) {
