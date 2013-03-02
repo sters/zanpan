@@ -49,7 +49,8 @@ var jqBefunge = {};
             var $head = $("head:first");
             var scripts = ["js/input_buffer.js", "js/result.js", "js/stack.js", "js/code.js"];
             $.each(scripts, function(i, src) {
-                $.getScript(src);
+                var x = "<script type='text\/javascript' src='" + src + "><\/script>";
+                console.log(x);
             });
             
             // set tags
@@ -70,7 +71,7 @@ var jqBefunge = {};
                 $("html,body").animate({
                     scrollTop: $(BefungeElements.RunCode).offset().top
                 }, 0);
-                Code.Run();
+                (new jqBefunge.Code).run();
             });
             btStep.click(function(){
                 if(Code.running) {
