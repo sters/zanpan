@@ -12,7 +12,7 @@
         this.source    = [];     // Befunge source
         this.lenmax    = 0;      // source max width
         this.running   = false;  // code running?
-        this.timer     = null;      // timer object
+        this.timer     = null;   // timer object
         this.strings   = false;  // now state = string command?
         
         this.Stack       = new $jb.Stack;
@@ -95,7 +95,7 @@
      *     pause only : false or nothing
      */
     $jb.Code.prototype.stop = function(abord) {
-        clearTimeout(this.nowTimeout);
+        clearInterval(this.timer);
         if(abord)
             this.running = false;
     };
@@ -105,7 +105,7 @@
      * Code one step action
      * @return {boolean} code stopped:false, continue:true
      */
-    $jb.Code.step : function() {
+    $jb.Code.prototype.step = function() {
         if(!this.running) return false; // code running check
         
         // string command
@@ -253,40 +253,5 @@
         this.Next();
         return true;
     };
-    
-    /*        
-        // code settings
-        var Code = {
-            runDelay : 1, // millisecconds, use "setTimeout"
-        };
-        
-        // management befunge code
-        Code = $.extend(Code, {           
-            MakeTable : function() {
-                $(BefungeElements.RunCode).text("");
-                for(var i=0, ymax=this.source.length; i<ymax; i++) {
-                    var tr = $("<tr>");
-                    for(var j=0, xmax=this.source[i].length; j<xmax; j++) {
-                        tr.append(
-                            $("<td>").text(this.source[i].substr(j,1))
-                        );
-                    }
-                    $(BefungeElements.RunCode).append(tr);
-                }
-                $(BefungeElements.RunCode + ' td').dblclick(function(){
-                    $(this).toggleClass("break");
-                });
-            },
-            UpdateTable : function(x,y, character) {
-                $(BefungeElements.RunCode + " tr:eq(" + y  + ") td:eq(" + x + ")")
-                    .text(character);
-            },
-            MoveTable : function(remove) {
-                $(BefungeElements.RunCode + " tr:eq(" + this.pos[1]  + ") td:eq(" + this.pos[0] + ")")
-                    .toggleClass("now", !remove);
-            },
-        });
-    };
-    */
     
 })(jqBefunge);
