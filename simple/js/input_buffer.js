@@ -1,42 +1,63 @@
 
-(function($) {
+(function($jb) {
     
-    $.fn.SetBefunge = function() {
-        
-        // Buf.. does not mean, its <input> texts
-        var InputBuffer = {
-            pos : 0,
-            Prompt : function(txt) {
-                $(BefungeElements.Input).prev().text(txt);
-            },
-            Clear : function() {
-                $(BefungeElements.Input).val("");
-                this.pos = 0;
-            },
-            Set : function(d) {
-                $(BefungeElements.Input).val(d);
-                this.pos = 0;
-            },
-            Get : function(nonMove) {
-                var str = $(BefungeElements.Input).val();
-                if(str.length <= this.pos) return 0;
-                var c = str.substr(this.pos, 1);
-                if(!nonMove) this.pos++;
-                return c;
-            },
-            ToStackAll : function() {
-                var c;
-                while((c = this.Get()) != 0)
-                    Stack.Push(c);
-                return c;
-            },
-            DisableBox : function() {
-                $(BefungeElements.Input).attr("disabled","disabled");
-            },
-            EnableBox : function() {
-                $(BefungeElements.Input).removeAttr("disabled");
-            },
-        };
+    /**
+     * Befunge InputBuffer class
+     * @constructor
+     */
+    $jb.InputBuffer = function() {
+        this.pos = 0;
+        this.stack = null;
+        this.buffer = "";
     };
     
-})(jQuery);
+    /**
+     * Clear buffer
+     */
+    $jb.InputBuffer.prototype.Clear = function() {
+        this.buffer = "";
+        this.pos = 0;
+    };
+    
+    /**
+     * Set buffer
+     * @param {string} buffer text
+     */
+    $jb.InputBuffer.prototype.Set = function(str) {
+        this.buffer = str;
+        this.pos = 0;
+    };
+    
+    /**
+     * Add buffer
+     * @param {string} buffer text
+     */
+    $jb.InputBuffer.prototype.Set = function(str) {
+        this.buffer += str;
+        this.pos = 0;
+    };
+    
+    /**
+     * Get value
+     * @param {boolean} Don't position change: true,
+     *     false : move buffer position
+     */
+    $jb.InputBuffer.prototype.Get = function(nonMove) {
+        if(this.buffer.length <= this.pos) return 0;
+        var c = this.buffer.substr(this.pos, 1);
+        if(!nonMove) this.pos++;
+        return c;
+    };
+    
+    /**
+     * Get All values. want to fix latter...
+     * @param {string} buffer text
+     */
+    $jb.InputBuffer.prototype.GetAll = function() {
+        var c;
+        while((c = this.Get()) != 0)
+            Stack.Push(c);
+        return c;
+    }
+
+})(jqBefunge);
