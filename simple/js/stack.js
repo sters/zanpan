@@ -9,6 +9,7 @@
     $jb.Stack = function(){
         Array.apply(this);
     };
+    $jb.Stack.prototype = new Array();
     
     
     /**

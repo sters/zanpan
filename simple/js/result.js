@@ -9,5 +9,6 @@
     $jb.Result = function(){
         $jb.InputBuffer.apply(this);
     };
+    $jb.Result.prototype = new $jb.InputBuffer();
         
 })(jqBefunge);
