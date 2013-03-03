@@ -47,11 +47,17 @@ var jqBefunge = {};
             
             // BefungeScripts Deferred Loading
             var $head = $("head:first");
-            var scripts = ["js/input_buffer.js", "js/result.js", "js/stack.js", "js/code.js"];
-            $.each(scripts, function(i, src) {
-                var x = "<script type='text\/javascript' src='" + src + "><\/script>";
-                console.log(x);
-            });
+            var script_load = function(scripts) {
+                if(scripts.length == 0) return;
+                var script = document.createElement("script");
+                script.setAttribute("type", "text/javascript");
+                script.setAttribute("src", scripts.shift());
+                script.onload = function() {
+                    script_load(scripts);
+                };
+                $("head")[0].appendChild(script);
+            };
+            script_load(["js/input_buffer.js", "js/result.js", "js/stack.js", "js/code.js"]);
             
             // set tags
             element.html("");
