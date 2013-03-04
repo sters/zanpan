@@ -57,7 +57,7 @@ var jsBefunge = {};
                 };
                 $("head")[0].appendChild(script);
             };
-            script_load(["js/input_buffer.js", "js/result.js", "js/stack.js", "js/code.js"]);
+            script_load(["js/input_buffer.js", "js/result.js", "js/stack.js", "js/code.js", "js/event.js"]);
             
             // set tags
             element.html("");
