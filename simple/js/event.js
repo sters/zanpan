@@ -34,7 +34,7 @@
     
     /**
      * Event fire.
-     * @param {target} Target string
+     * @param {string} Target string
      * @param {object} Event call in this
      */
     $jb.EventManage.prototype.fire = function(target, _this) {
