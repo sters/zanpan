@@ -22,16 +22,10 @@
     };
     
     // function override for event call
-    var overrides = ["push", "pop"];
-    var clsname   = "Stack";
-    for(var _i=0, _m=overrides.length; _i<_m; _i++) {
-        var _item = overrides[_i];
-        eval(
-            "$jb." + clsname + ".prototype." + _item + "= function() {" +
-                "this.__super." + _item + ".apply(this, arguments);" +
-                "$jb.Event.fire('" + clsname + "." + _item + "', this);" +
-            "};"
-        );
-    }
+    var funcs = {
+        "push" : function() { this.__super.push.apply(this, arguments); },
+        "pop"  : function() { this.__super.pop.apply(this, arguments);  },
+    };
+    $jb.Event.defineFire("Stack", funcs);
     
 })(jsBefunge);
