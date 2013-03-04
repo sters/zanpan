@@ -1,5 +1,5 @@
 
-var jqBefunge = {};
+var jsBefunge = {};
 
 (function($) {
     
@@ -77,7 +77,7 @@ var jqBefunge = {};
                 $("html,body").animate({
                     scrollTop: $(BefungeElements.RunCode).offset().top
                 }, 0);
-                (new jqBefunge.Code).run( $(BefungeElements.Code).val(), function(code) {
+                (new jsBefunge.Code).run( $(BefungeElements.Code).val(), function(code) {
                     console.log(code.Result.buffer);
                 });
             });
@@ -154,7 +154,7 @@ var jqBefunge = {};
             ;
         })();
         
-        return this; // jqBefunge method chain
+        return this; // jsBefunge method chain
     };
     
 })(jQuery);

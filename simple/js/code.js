@@ -264,4 +264,4 @@
         return true;
     };
     
-})(jqBefunge);
+})(jsBefunge);
