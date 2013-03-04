@@ -36,12 +36,13 @@
      * Event fire.
      * @param {string} Target string
      * @param {object} Event call in this
+     * @param {Array} Event use arguments
      */
-    $jb.EventManage.prototype.fire = function(target, _this) {
+    $jb.EventManage.prototype.fire = function(target, _this, args) {
         if(!this.events[target]) return;
         for(var _i=0, _m=this.events[target].length; _i < _m; _i++) {
             var event = this.events[target][_i];
-            event.call(_this, target, _this);
+            event.call(_this, _this, args);
         }
     };
     
@@ -56,7 +57,7 @@
                 eval(
                     "$jb." + clsname + ".prototype." + _key + "= function() {" +
                         "_item.apply(this, arguments);" +
-                        "$jb.Event.fire('" + clsname + "." + _key + "', this);" +
+                        "$jb.Event.fire('" + clsname + "." + _key + "', this, arguments);" +
                     "};"
                 );
             })(functions[_key]);
