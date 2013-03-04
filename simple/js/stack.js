@@ -10,6 +10,7 @@
         Array.apply(this);
     };
     $jb.Stack.prototype = new Array();
+    $jb.Stack.prototype.__super = Array.prototype;
     
     
     /**
