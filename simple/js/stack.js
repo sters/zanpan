@@ -19,4 +19,4 @@
         this.length = 0;
     };
         
-})(jqBefunge);
+})(jsBefunge);

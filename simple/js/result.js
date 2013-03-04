@@ -11,4 +11,4 @@
     };
     $jb.Result.prototype = new $jb.InputBuffer();
         
-})(jqBefunge);
+})(jsBefunge);
