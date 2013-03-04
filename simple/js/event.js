@@ -56,8 +56,9 @@
             (function(_item) {
                 eval(
                     "$jb." + clsname + ".prototype." + _key + "= function() {" +
-                        "_item.apply(this, arguments);" +
+                        "var _v = _item.apply(this, arguments);" +
                         "$jb.Event.fire('" + clsname + "." + _key + "', this, arguments);" +
+                        "return _v;" +
                     "};"
                 );
             })(functions[_key]);

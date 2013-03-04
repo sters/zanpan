@@ -24,7 +24,7 @@
     // function override for event call
     var funcs = {
         "push" : function() { this.__super.push.apply(this, arguments); },
-        "pop"  : function() { this.__super.pop.apply(this, arguments);  },
+        "pop"  : function() { return this.__super.pop.apply(this, arguments);  },
     };
     $jb.Event.defineFire("Stack", funcs);
     
