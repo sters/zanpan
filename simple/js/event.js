@@ -46,6 +46,24 @@
     };
     
     /**
+     * Event fire definer for jsBefunge.* classes
+     * @param {string} class name
+     * @param {Object<string, function>} function names, call function pair
+     */
+    $jb.EventManage.prototype.defineFire = function(clsname, functions) {
+        for(var _key in functions) {
+            (function(_item) {
+                eval(
+                    "$jb." + clsname + ".prototype." + _key + "= function() {" +
+                        "_item.apply(this, arguments);" +
+                        "$jb.Event.fire('" + clsname + "." + _key + "', this);" +
+                    "};"
+                );
+            })(functions[_key]);
+        }
+    };
+    
+    /**
      * Event management instance
      * @type {jsBefunge.EventManage}
      */
