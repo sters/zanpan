@@ -50,6 +50,9 @@
 
         // first command
         this.c = this.source[0].charAt(0);
+        
+        // init event
+        $jb.Event.fire("Code.init", this);
     };
     
     /**
@@ -70,6 +73,9 @@
         
         // command update
         this.c = this.source[this.pos[1]].charAt(this.pos[0]);
+        
+        // moving next event
+        $jb.Event.fire("Code.next", this, arguments);
     };
     
     /**
@@ -79,8 +85,10 @@
         if(this.running && !reset) return;
         this.init();
         this.running = true;
+
+        // code start event
+        $jb.Event.fire("Code.start", this, arguments);
     };
-    
     
     /**
      * Code run
@@ -96,7 +104,16 @@
                 if(callback) callback.call(_this, _this);
                 _this.stop();
             }
+
+            // code step event
+            //   why dont write in step() ?
+            //   because step() func is too long, some return point
+            $jb.Event.fire("Code.step", _this);
+
         }, 50);
+            
+        // code run event
+        $jb.Event.fire("Code.run", this, arguments);
     };
 
     /**
@@ -108,6 +125,9 @@
         clearInterval(this.timer);
         if(abord)
             this.running = false;
+
+        // code run event
+        $jb.Event.fire("Code.run", this, arguments);
     };
 
     
