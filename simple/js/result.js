@@ -8,6 +8,7 @@
      */
     $jb.Result = function(){
         $jb.InputBuffer.apply(this);
+        this.__super = $jb.InputBuffer.prototype;
     };
     $jb.Result.prototype = new $jb.InputBuffer();
         
