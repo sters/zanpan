@@ -34,7 +34,6 @@
      */
     $jb.Buffer.prototype.add = function(str) {
         this.buffer += str;
-        this.pos = 0;
     };
     
     /**
