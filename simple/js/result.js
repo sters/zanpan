@@ -4,12 +4,12 @@
     /**
      * Befunge Result class
      * @constructor
-     * @augments $jb.InputBuffer
+     * @augments $jb.Buffer
      */
     $jb.Result = function(){
-        $jb.InputBuffer.apply(this);
-        this.__super = $jb.InputBuffer.prototype;
+        $jb.Buffer.apply(this);
     };
-    $jb.Result.prototype = new $jb.InputBuffer();
-        
+    $jb.Result.prototype = new $jb.Buffer();
+    $jb.Result.prototype.__super = $jb.Buffer.prototype;
+    
 })(jsBefunge);
