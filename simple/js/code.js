@@ -94,22 +94,21 @@
      * Code run
      * @param {string} Befunge Source
      */
-    $jb.Code.prototype.run = function(src, callback) {
+    $jb.Code.prototype.run = function(src) {
         this.stop();
         this.init(src);
         this.running = true;
         var _this = this;
         this.timer = setInterval(function() {
+            // step exec
             if(!_this.step()) {
-                if(callback) callback.call(_this, _this);
                 _this.stop();
+            } else {
+                // code step event
+                //   why dont write in step() ?
+                //   because step() func is too long, some return point
+                $jb.Event.fire("Code.step", _this);
             }
-
-            // code step event
-            //   why dont write in step() ?
-            //   because step() func is too long, some return point
-            $jb.Event.fire("Code.step", _this);
-
         }, 50);
             
         // code run event
@@ -127,7 +126,7 @@
             this.running = false;
 
         // code run event
-        $jb.Event.fire("Code.run", this, arguments);
+        $jb.Event.fire("Code.stop", this, arguments);
     };
 
     
@@ -265,7 +264,6 @@
                     this.source[y].substring(0, x)
                     + String.fromCharCode(v)
                     + (x+1 == this.source[y].length ? '' : this.source[y].substring(x+1, this.source[y].length));
-                this.UpdateTable(x,y, String.fromCharCode(v));
                 break;
                 
             // nop
