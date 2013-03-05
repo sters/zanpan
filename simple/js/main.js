@@ -31,15 +31,37 @@ var _befunge;
             btStep  = $("<input type='button' value='Step'>"),
             btPause = $("<input type='button' value='Pause'>"),
             btAbord = $("<input type='button' value='Abord'>"),
-                       
+            
+            // init UI
+            initUI = function(reverse) {
+                $("html,body").css( "scrollTop", $("#" + _elementIDs.RunCode).offset().top );
+                if(reverse) {
+                    txtBox.removeAttr("disabled");
+                    btRun.removeAttr("disabled");
+                    btStep.removeAttr("disabled");
+                    btPause.attr("disabled", "true").val("Pause");
+                    btAbord.attr("disabled", "true");
+                    return
+                }
+                txtBox.attr("disabled", "disabled");
+                btRun.attr("disabled", "disabled");
+                btStep.removeAttr("disabled");
+                btPause.removeAttr("disabled");
+                btAbord.removeAttr("disabled");
+            },
+            
             // add befunge events
             addBefungeEvents = function(){
             
                 // code changed call event
                 var onCodePositionChanged = function(remove) {
-                    $("#" + _elementIDs.RunCode +
-                      " tr:eq(" + _befunge.pos[1]  + ") td:eq(" + _befunge.pos[0] + ")")
-                        .toggleClass("now", !remove);
+                    var nowObject = $("#" + _elementIDs.RunCode +
+                      " tr:eq(" + _befunge.pos[1]  + ") td:eq(" + _befunge.pos[0] + ")");
+                    nowObject.toggleClass("now", !remove);
+                    
+					if(!remove && nowObject.hasClass("break")) {
+						_befunge.stop();
+					}
                 };
                 
                 // Stack action
@@ -75,9 +97,18 @@ var _befunge;
                         onCodePositionChanged();
                     });
 
-                    // code stop
-                    //_befunge._event.on("Code.stop", function(t,v){ console.log("Code.stop"); console.log(t.Result.buffer); });
-                
+                    // code pause
+                    _befunge._event.on("Code.pause", function(t,v){
+                        initUI();
+                        btStep.removeAttr("disabled");
+                        btPause.val("Resume");
+                    });
+                    
+                    // code end
+                    _befunge._event.on("Code.end", function(t,v){
+                        initUI(true);
+                    });
+                    
                     // init event => make table
                     _befunge._event.on("Code.init", function(t,v){
                         var $runcode = $("#" + _elementIDs.RunCode)
@@ -101,16 +132,6 @@ var _befunge;
             
             // add UI events
             addUIEvents = function() {
-                
-                // init UI
-                var initUI = function() {
-                    txtBox.attr("disabled", "disabled");
-                    btRun.attr("disabled", "disabled");
-                    btStep.attr("disabled", "disabled");
-                    btPause.removeAttr("disabled");
-                    btAbord.removeAttr("disabled");
-                    $("html,body").css( "scrollTop", $("#" + _elementIDs.RunCode).offset().top );                
-                };
                 
                 // run button
                 btRun.click(function(){
@@ -148,11 +169,7 @@ var _befunge;
                 // abord button
                 btAbord.click(function(){
                     _befunge.stop(true);
-                    txtBox.removeAttr("disabled");
-                    btRun.removeAttr("disabled");
-                    btStep.removeAttr("disabled");
-                    btPause.attr("disabled", "true").val("Pause");
-                    btAbord.attr("disabled", "true");
+                    initUI(true);
                 }).attr("disabled", "true");
             };
         
