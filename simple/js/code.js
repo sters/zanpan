@@ -16,9 +16,13 @@
         this.strings   = false;  // now state = string command?
         this._event = new jsBefunge.EventManage(); // local event
         
-        this.Stack       = new $jb.Stack();
-        this.Result      = new $jb.Result();
-        this.InputBuffer = new $jb.InputBuffer();
+        this.Stack              = new $jb.Stack();
+        this.Result             = new $jb.Result();
+        this.InputBuffer        = new $jb.InputBuffer();
+        this.Stack._event       = this._event
+        this.Result._event      = this._event
+        this.InputBuffer._event = this._event
+        
     };
     
     /**
