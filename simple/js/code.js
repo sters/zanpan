@@ -78,9 +78,6 @@
         
         // command update
         this.c = this.source[this.pos[1]].charAt(this.pos[0]);
-        
-        // moving next event
-        this.eventFire("Code.next", this);
     };
     
     /**
@@ -101,11 +98,6 @@
                 if(!_this.step()) {
                     _this.stop();
                     _this.eventFire("Code.end", _this);
-                } else {
-                    // code step event
-                    //   why dont write in step() ?
-                    //   because step() func is too long, some return point
-                    _this.eventFire("Code.step", _this);
                 }
             }, 50);
         }
@@ -134,6 +126,18 @@
      * @return {boolean} code stopped:false, continue:true
      */
     $jb.Code.prototype.step = function() {
+        this.eventFire("Code.beforeStep", this);
+        var val = this._step();
+        this.eventFire("Code.step", this);
+        this.eventFire("Code.afterStep", this);
+        return val;
+    }
+    
+    /**
+     * Code one step action practical use function
+     * @return {boolean} code stopped:false, continue:true
+     */
+    $jb.Code.prototype._step = function() {
         if(!this.running) return false; // code running check
         
         // string command
