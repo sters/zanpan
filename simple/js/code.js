@@ -89,7 +89,7 @@
     $jb.Code.prototype.run = function(src, initOnly) {
         var _this = this;
         if(_this.running == false) {
-            _this.stop();
+            _this.stop(true);
             _this.init(src);
             _this.running = true;
         }
@@ -114,11 +114,13 @@
      */
     $jb.Code.prototype.stop = function(abord) {
         clearInterval(this.timer);
-        if(abord)
+        if(abord) {
             this.running = false;
-
-        // code run event
-        this.eventFire("Code.stop", this);
+            this.eventFire("Code.stop", this);
+        } else {
+            // not abord => pause
+            this.eventFire("Code.pause", this);
+        }
     };
 
     
