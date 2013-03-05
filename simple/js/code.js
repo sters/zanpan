@@ -80,38 +80,31 @@
     };
     
     /**
-     * Code running start
-     */
-    $jb.Code.prototype.start = function(reset) {
-        if(this.running && !reset) return;
-        this.init();
-        this.running = true;
-
-        // code start event
-        this.eventFire("Code.start", this);
-    };
-    
-    /**
      * Code run
      * @param {string} Befunge Source
+     * @param {boolean} init only flag ( default: false )
      */
-    $jb.Code.prototype.run = function(src) {
+    $jb.Code.prototype.run = function(src, initOnly) {
         var _this = this;
-        _this.stop();
-        _this.init(src);
-        _this.running = true;
-        _this.timer = setInterval(function() {
-            // step exec
-            if(!_this.step()) {
-                _this.stop();
-                _this.eventFire("Code.end", _this);
-            } else {
-                // code step event
-                //   why dont write in step() ?
-                //   because step() func is too long, some return point
-                _this.eventFire("Code.step", _this);
-            }
-        }, 50);
+        if(_this.running == false) {
+            _this.stop();
+            _this.init(src);
+            _this.running = true;
+        }
+        if(!initOnly) {
+            _this.timer = setInterval(function() {
+                // step exec
+                if(!_this.step()) {
+                    _this.stop();
+                    _this.eventFire("Code.end", _this);
+                } else {
+                    // code step event
+                    //   why dont write in step() ?
+                    //   because step() func is too long, some return point
+                    _this.eventFire("Code.step", _this);
+                }
+            }, 50);
+        }
             
         // code run event
         _this.eventFire("Code.run", this);
