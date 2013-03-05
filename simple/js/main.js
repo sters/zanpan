@@ -203,7 +203,16 @@ var _befunge;
         
         // add tags
         element
-            .append(txtCode)
+            .append(txtCode.text([
+                'v ^_       v',
+                '>0"!dlroW"v ',
+                'v  :#     < ',
+                '>" ,olleH" v',
+                '   ^       <',
+                '  >5100p:v  ',
+                '@v *g00: _g.',
+                ' > 00p1-:^  '
+            ].join("\n")))
             .append(
                 $("<span><span>Input</span></span>")
                     .append(txtBox)
