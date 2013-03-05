@@ -57,6 +57,7 @@
                 eval(
                     "$jb." + clsname + ".prototype." + _key + "= function() {" +
                         "var _v = _item.apply(this, arguments);" +
+                        "this._event.fire('" + clsname + "." + _key + "', this, arguments);" +
                         "$jb.Event.fire('" + clsname + "." + _key + "', this, arguments);" +
                         "return _v;" +
                     "};"
@@ -66,7 +67,7 @@
     };
     
     /**
-     * Event management instance
+     * Event management global instance
      * @type {jsBefunge.EventManage}
      */
     $jb.Event = new $jb.EventManage();

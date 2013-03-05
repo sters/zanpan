@@ -14,6 +14,7 @@
         this.running   = false;  // code running?
         this.timer     = null;   // timer object
         this.strings   = false;  // now state = string command?
+        this._event = new jsBefunge.EventManage(); // local event
         
         this.Stack       = new $jb.Stack();
         this.Result      = new $jb.Result();
@@ -52,7 +53,7 @@
         this.c = this.source[0].charAt(0);
         
         // init event
-        $jb.Event.fire("Code.init", this);
+        this.eventFire("Code.init", this);
     };
     
     /**
@@ -75,7 +76,7 @@
         this.c = this.source[this.pos[1]].charAt(this.pos[0]);
         
         // moving next event
-        $jb.Event.fire("Code.next", this, arguments);
+        this.eventFire("Code.next", this);
     };
     
     /**
@@ -87,7 +88,7 @@
         this.running = true;
 
         // code start event
-        $jb.Event.fire("Code.start", this, arguments);
+        this.eventFire("Code.start", this);
     };
     
     /**
@@ -95,24 +96,25 @@
      * @param {string} Befunge Source
      */
     $jb.Code.prototype.run = function(src) {
-        this.stop();
-        this.init(src);
-        this.running = true;
         var _this = this;
-        this.timer = setInterval(function() {
+        _this.stop();
+        _this.init(src);
+        _this.running = true;
+        _this.timer = setInterval(function() {
             // step exec
             if(!_this.step()) {
                 _this.stop();
+                _this.eventFire("Code.end", _this);
             } else {
                 // code step event
                 //   why dont write in step() ?
                 //   because step() func is too long, some return point
-                $jb.Event.fire("Code.step", _this);
+                _this.eventFire("Code.step", _this);
             }
         }, 50);
             
         // code run event
-        $jb.Event.fire("Code.run", this, arguments);
+        _this.eventFire("Code.run", this);
     };
 
     /**
@@ -126,7 +128,7 @@
             this.running = false;
 
         // code run event
-        $jb.Event.fire("Code.stop", this, arguments);
+        this.eventFire("Code.stop", this);
     };
 
     
@@ -281,5 +283,17 @@
         this.next();
         return true;
     };
+    
+    /**
+     * Event fire function
+     * @param {string} Event target
+     * @param {object} "this" object
+     * @param {Array<object>} args in event funcs
+     */
+    $jb.Code.prototype.eventFire = function(target, _this, args){
+        this._event.fire(target, _this, args);
+        $jb.Event.fire(target, _this, args);
+    };
+    
     
 })(jsBefunge);

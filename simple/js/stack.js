@@ -8,6 +8,9 @@
      */
     $jb.Stack = function(){
         Array.apply(this);
+        
+        // local event
+        this._event = new jsBefunge.EventManage();
     };
     $jb.Stack.prototype = new Array();
     $jb.Stack.prototype.__super = Array.prototype;
