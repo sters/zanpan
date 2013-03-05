@@ -6,9 +6,9 @@
      * @constructor
      */
     $jb.Buffer = function() {
-        this.pos = 0;
-        this.stack = null;
-        this.buffer = "";
+        this.pos = 0;       // only use input, buf position
+        this.buffer = "";   // buffer string
+        this._event = new jsBefunge.EventManage(); // local event
     };
     
     /**
@@ -50,18 +50,4 @@
         return c;
     };
     
-    /**
-     * Get All values. want to fix latter...
-     * @param {string} buffer text
-     * @returns {string} front of buffer
-     */
-    $jb.Buffer.prototype.getAll = function() {
-        if(this.stack == null)
-            return "";
-        var c;
-        while((c = this.get()) != 0)
-            this.stack.Push(c);
-        return c;
-    }
-
 })(jsBefunge);
