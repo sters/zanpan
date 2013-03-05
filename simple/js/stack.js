@@ -17,6 +17,19 @@
     
     
     /**
+     * Overrides reverse :dont broke this obj
+     */
+    $jb.Stack.prototype.reverse = function() {
+        return  Array.prototype.slice.call(this).reverse();
+    };
+    /**
+     * Broken reverse() function
+     */
+    $jb.Stack.prototype.reverse_self = function() {
+        this.__super.reverse(arguments);
+    };
+
+    /**
      * Clear stack
      */
     $jb.Stack.prototype.clear = function() {
