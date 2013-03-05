@@ -6,6 +6,7 @@
      * @constructor
      */
     $jb.Code = function(){
+        this.wait      = 16;     // interval time (XX msec)
         this.direction = 6;      // 2:down, 4:left, 6:right, 8:up
         this.pos       = [0,0];  // now position
         this.c         = '';     // now command
@@ -99,7 +100,7 @@
                     _this.stop();
                     _this.eventFire("Code.end", _this);
                 }
-            }, 50);
+            }, this.wait);
         }
             
         // code run event
