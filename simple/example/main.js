@@ -1,8 +1,4 @@
 
-var jsBefunge = {};
-
-var _befunge;
-
 (function($) {
     
     $.fn.SetBefunge = function() {
@@ -18,7 +14,7 @@ var _befunge;
         };
 
         // Befunge object
-        _befunge = new jsBefunge.Code();
+        var _befunge = new jsBefunge.Code();
                 
         // befunge element
         var element = $(this);

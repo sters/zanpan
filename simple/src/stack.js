@@ -34,6 +34,7 @@
      */
     $jb.Stack.prototype.clear = function() {
         this.length = 0;
+        this._event.fire("Stack.clear", this);
         $jb.Event.fire("Stack.clear", this);
     };
     
