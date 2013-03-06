@@ -1,0 +1,30 @@
+﻿<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8"></meta>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="main.js"></script>
+    
+    
+    <script type="text/javascript">
+        // こうなっているのは、分割したファイルで名前空間を作る方法がわからなかったのです....
+        // jsbefunge.min.js ではちゃんと先頭で定義してあります....
+        var jsBefunge = {}
+    </script>
+    <script type="text/javascript" src="../event.js"></script>
+    <script type="text/javascript" src="../buffer.js"></script>
+    <script type="text/javascript" src="../input_buffer.js"></script>
+    <script type="text/javascript" src="../result.js"></script>
+    <script type="text/javascript" src="../stack.js"></script>
+    <script type="text/javascript" src="../code.js"></script>
+	<script type="text/javascript">
+		$(function(){$("<div>").SetBefunge().appendTo("body");});
+	</script>
+</head>
+
+<body>
+	<div id="testDiv">
+	</div>
+</body>
+
+</html>
