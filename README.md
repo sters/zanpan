@@ -1,29 +1,26 @@
-#Befunge Interpreter
-2012/07/01 STERS
+# jsBefunge
 
-"残パン会"での成果物です。  
-./js/befunge.js と ./chat/js/befunge.js の内容は異なります。  
-前者はBefunge-93にほぼ従ったもので、後者はチャット用に調整してあります。
+_Description: "Befunge" interpreter in javascript_
 
-###チャット
-入力チェックとかほとんどしてないのでXSS的な脆弱性がある気がします。  
-本運用する際には気をつけてください。
+## Project Setup
 
-###Befungeインタプリタ
-Wikipediaにある2つのコード（下記参照）と、自分で書いたコードでしか試していないので、本来の挙動と異なる可能性があります。  
-Befunge開発に使用する場合は気をつけてください。  
+1. Clone this repository or download jsBefunge.min.js
+2. Use jsBefunge.min.js to refer example/index.html and example/main.js
 
-    v @_       v
-    >0"!dlroW"v 
-    v  :#     < 
-    >" ,olleH" v
-       ^       <
-    #############
-    5 100p:v
-    v *g00:_00g.@
-    >00p1-:^
-  
-すごいと思った？残念！・・・・・残念でした！  
+## Testing
 
------
-これらのプログラムを使用した事により、PCやサーバに何かしらの損害が発生したとしても、私STERSは一切の責任をとらないものとします。
+This project don't have major test programs.
+Use src/test/_simple_test.js
+
+## Contributing changes
+
+- _Internal git workflow_
+- _Pull request guidelines_
+- _Tracker project_
+- _Google group_
+- _irc channel_
+- _"Please open github issues"_
+
+## License
+
+GPL v3
