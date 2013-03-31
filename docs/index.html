@@ -1,0 +1,206 @@
+<html lang='ja'>
+  <head>
+    <meta charset='utf-8'>
+    <style>
+      /*<![CDATA[*/
+        html {
+            font-family: mono;
+            line-height: 1.5;
+        }
+        table { border-collapse: collapse; }
+        td { padding:4px; border:1px solid black; }
+        .block { margin-left:30px; }
+      /*]]>*/
+    </style>
+  </head>
+  <body>
+    <h1>jsBefunge Document (simple)</h1>
+    <h2>これはなんですか</h2>
+    <div class='block'>
+      <p>
+        これは
+        <a href="http://ja.wikipedia.org/wiki/Befunge" target="_blank">Befunge</a>（外部リンク）
+        という言語をJavaScriptで実装したものです。
+      </p>
+      <p>
+        残パン会#2 の為に作成したものを見なおしたものになります。<br>
+        残パン会でのログは ->
+        <a href="http://stersblog.blog15.fc2.com/blog-entry-419.html" target="_blank">残パン会に参加してきました。</a>（外部リンク）
+      </p>
+      <p>
+        テストコードが少ないため、完全に動作するかわかりません。<br>
+        Wikipediaに記載されているコードに関しては動作することを確認しています。
+      </p>
+    </div>
+    <hr>
+    <h2>はうとぅーゆーず</h2>
+    <div class='block'>
+      <p>
+        "jsbefunge.min.js" には、Befungeが動く環境しか書かれていません。
+      </p>
+      <p>
+        このスクリプトを読み込んだだけでは何もできないので、<br>
+        実際の使い方としては、
+        <a href="../example/index.html">example/index.html</a> と
+        <a href="../example/main.js">example/main.js</a>
+        を参考にしてください。
+      </p>
+    </div>
+    <hr>
+    <h2>もっと詳しく！</h2>
+    <div class='block'>
+      <p>
+        jsBefunge というオブジェクトが定義され、その中でコードの実行やスタックなどが管理されています。<br>
+        jsBefunge の中にはいくつかのクラスや変数が定義されています。<br>
+      </p>
+      <table>
+        <tr>
+          <td>jsBefunge.EventManager</td>
+          <td>全体で生じるアクションに対してイベントメソッドを呼び出すためのクラスです。</td>
+        </tr>
+        <tr>
+          <td>jsBefunge.Buffer</td>
+          <td>バッファ（と言うなのstringを包んだだけ）を管理します。直接使いません。</td>
+        </tr>
+        <tr>
+          <td>jsBefunge.Result</td>
+          <td>いわゆる標準出力にあたるクラスです。</td>
+        </tr>
+        <tr>
+          <td>jsBefunge.InputBuffer</td>
+          <td>いわゆる標準入力にあたるクラスです。</td>
+        </tr>
+        <tr>
+          <td>jsBefunge.Stack</td>
+          <td>スタックを管理するクラスです。</td>
+        </tr>
+        <tr>
+          <td>jsBefunge.Code</td>
+          <td>
+            上記クラスを統括し、実際にコードを動かす中核となるクラスです。<br>
+            こいつをnewしてrunすると内部でBefungeコードが実行出来ます。
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>jsBefunge.Event</td>
+          <td>jsBefunge.EventManagerのインスタンスで、グローバルイベントとして使用出来ます</td>
+        </tr>
+      </table>
+      <p>
+        順を追って、もう少し詳しく説明をします。
+      </p>
+      <hr>
+      <h3>イベント？</h3>
+      <div class='block'>
+        jsBefunge.Buffer, jsBefunge.Stack, jsBefunge.Code にはそれぞれが EventManager のインスタンスを持っています。<br>
+        また、グローバルなものとして、jsBefunge.Event が EventManager のインスタンスになっています。<br>
+        それらに対して定義されてあるメソッド（例えば InputBuffer.add や Stack.pop など）を実行することでイベントが発生するようになっています。<br>
+        <br>
+        発生したイベントをつかむには、次のサンプルコードのようにしてイベントハンドラを設定します。
+        <pre>sample code
+        var s = new jsBefunge.Stack();
+        s._event.on("Stack.push", function(_this, args){
+        console.log("called Stack.push");
+        });
+        s._event.on("Stack.pop", function(_this, args){
+        console.log("called Stack.pop");
+        });
+        s._event.on("Stack.clear", function(_this, args){
+        console.log("called Stack.clear");
+        });
+        s.push("a");
+        s.push("b");
+        s.push("c");
+        s.pop();
+        s.clear();</pre>
+      </div>
+      <h3>バッファ？標準入出力？</h3>
+      <div class='block'>
+        Befungeにも標準入出力があり、ユーザからの入力を行ったり、計算した結果を表示したりすることもできます。<br>
+        それらを管理（という名のstringを包んだだけ）しているものが jsBefunge.Buffer クラスのサブクラス達です。<br>
+        <br>
+        実際には、jsBefunge.Code の内部で使われるため、下記のようにしてアクセスします。<br>
+        <pre>sample code
+        var c = new jsBefunge.Code();
+        c._event.on("Code.end", function(t,v){
+        console.log(c.Result.buffer);
+        });
+        c.run(befungeCode);</pre>
+        このように jsBefunge.Code.InputBuffer / jsBefuinge.Code.Result として定義してあります。<br>
+        <br>
+        なお、サンプルのように、jsBefunge.Code にもイベントハンドラが設定できます。
+      </div>
+      <h3>スタック？</h3>
+      <div class='block'>
+        Befungeはスタックがベースとなっているため、値を保持には必ず使います。<br>
+        そのスタックを管理するのが jsBefunge.Stack クラスです。<br>
+        <br>
+        実際には、jsBefunge.Code の内部で使われるため、下記のようにしてアクセスします。<br>
+        <pre>sample code
+        var c = new jsBefunge.Code();
+        c._event.on("Code.step", function(t,v){
+        console.log(c.Stack[0]);
+        });
+        c.run(befungeCode);</pre>
+        ですが、スタックをBefunge外からいじるのは行なってはいけません。<br>
+        Befungeコードの実行結果が変わってしまいます。<br>
+        あなたが行えるのは値を確認することだけです。<br>
+        <br>
+        例えば <a href="../example/index.html">example/index.html</a> では、スタック操作のイベントハンドラを設定し、<br>
+        スタックの状態を表示するようにしています。<br>
+      </div>
+      <h3>コード？</h3>
+      <div class='block'>
+        jsBefunge.Code は全体を統合し、管理、実際の挙動を行なっているクラスです。<br>
+        ちらほらと前述のサンプルコードでも出てきていますが、インスタンスを作って、run(befungeCode) を呼び出すだけでコードが走ります。<br>
+        この befungeCode の部分には、Befungeのソースコード文字列をいれます。<br>
+        <pre>samplecode
+        var c = new jsBefunge.Code();
+        <!-- / calc "5!" => ans: 120 -->
+        c.run([
+        "5 100p:v",
+        "v *g00:_00g.@",
+        ">00p1-:^"
+        ].join("\n"));</pre>
+        うーん、Befungeは素晴らしい言語です。<br>
+        <a href="../example/index.html">example/index.html</a> では、&lt;textarea> の内容をそのまま流しています。<br>
+      </div>
+      <h3>グローバルイベント？</h3>
+      <div class='block'>
+        *まず使うことがないと思います* が、便利そうな予感がするので定義してあります。<br>
+        これを使う場面としては、複数の jsBefunge.Code インスタンスを用意したときです。<br>
+        <pre>sample code
+        jsBefunge.Event.on("Code.run", function(t,v){ console.log("start!"); });
+        jsBefunge.Event.on("Code.end", function(t,v){ console.log("end!"); });
+        var c = new jsBefunge.Code();
+        var c2 = new jsBefunge.Code();
+        <!-- / calc "5!" => ans: 120 -->
+        c.run(["5 100p:v", "v *g00:_00g.@", ">00p1-:^"].join("\n"));
+        <!-- / Hello, World! -->
+        c2.run([
+        'v @_       v',
+        '>0"!dlroW"v ',
+        'v  :#     < ',
+        '>" ,olleH" v',
+        '   ^       <',
+        ].join("\n"));</pre>
+        やはりBefungeは素晴らしい。<br>
+        このコードを実行すると、start! と end! が2つずつでてきます。どう使うかは利用者の発想次第です。<br>
+      </div>
+      <hr>
+      <p>
+        もっと情報が欲しい場合は、
+        <a href="../example/main.js">example/main.js</a>
+        または
+        <a href="../src/test/_simple_test.js">src/test/_simple_test.js</a>
+        または
+        <a href="./jsdoc/index.html">jsdoc</a>
+        を参照してください。
+      </p>
+    </div>
+  </body>
+</html>

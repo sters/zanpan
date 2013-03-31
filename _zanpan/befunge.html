@@ -5,7 +5,9 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 	<script type="text/javascript" src="./js/befunge.js"></script>
 	<script type="text/javascript">
-		$(function(){$("<div>").SetBefunge().appendTo("body");});
+	$(document).ready(function() {
+		$("#testDiv").SetBefunge();
+	});
 	</script>
 </head>
 

@@ -6,18 +6,24 @@
      * @constructor
      */
     $jb.Code = function(){
+        this.wait      = 16;     // interval time (XX msec)
         this.direction = 6;      // 2:down, 4:left, 6:right, 8:up
         this.pos       = [0,0];  // now position
         this.c         = '';     // now command
         this.source    = [];     // Befunge source
         this.lenmax    = 0;      // source max width
         this.running   = false;  // code running?
-        this.timer     = null;      // timer object
+        this.timer     = null;   // timer object
         this.strings   = false;  // now state = string command?
+        this._event = new jsBefunge.EventManage(); // local event
         
-        this.Stack       = new $jb.Stack;
-        this.Result      = new $jb.Result;
-        this.InputBuffer = new $jb.InputBuffer;
+        this.Stack              = new $jb.Stack();
+        this.Result             = new $jb.Result();
+        this.InputBuffer        = new $jb.InputBuffer();
+        this.Stack._event       = this._event
+        this.Result._event      = this._event
+        this.InputBuffer._event = this._event
+        
     };
     
     /**
@@ -25,21 +31,20 @@
      * @param {string} Befunge Source Codes.
      */
     $jb.Code.prototype.init = function(src){
-        this.source = src.split("\n");
-        
         // init values
-        this.Stack.init();
-        this.Result.init();
-        this.InputBuffer.init();
+        this.Stack.clear();
+        this.Result.clear();
+        this.InputBuffer.pos = 0;
         this.direction = 6;
         this.pos       = [0,0];
-        this.c         = '';
+        this.c         = "";
         this.lenmax    = 0;
         this.running   = false;
         this.timer     = 0;
         this.strings   = false;
         
         // source setup
+        this.source = src.split("\n");
         for(var i in this.source) {
             if(this.lenmax < this.source[i].length)
                 this.lenmax = this.source[i].length;
@@ -48,6 +53,12 @@
             if(this.lenmax > this.source[i].length)
                 this.source[i] += new Array(this.lenmax - this.source[i].length + 1).join(' ');
         }
+
+        // first command
+        this.c = this.source[0].charAt(0);
+        
+        // init event
+        this.eventFire("Code.init", this);
     };
     
     /**
@@ -71,22 +82,29 @@
     };
     
     /**
-     * Code running start
-     */
-    $jb.Code.prototype.start = function(reset) {
-        if(this.running && !reset) return;
-        this.Init();
-        this.running = true;
-    };
-    
-    
-    /**
      * Code run
+     * @param {string} Befunge Source
+     * @param {boolean} init only flag ( default: false )
      */
-    $jb.Code.prototype.run = function() {
-        this.Stop();
-        if(!this.running) this.Start(true);
-        this.timer = setInterval(this.step, 50);
+    $jb.Code.prototype.run = function(src, initOnly) {
+        var _this = this;
+        if(_this.running == false) {
+            _this.stop(true);
+            _this.init(src);
+            _this.running = true;
+        }
+        if(!initOnly) {
+            _this.timer = setInterval(function() {
+                // step exec
+                if(!_this.step()) {
+                    _this.stop();
+                    _this.eventFire("Code.end", _this);
+                }
+            }, this.wait);
+        }
+            
+        // code run event
+        _this.eventFire("Code.run", this);
     };
 
     /**
@@ -95,9 +113,14 @@
      *     pause only : false or nothing
      */
     $jb.Code.prototype.stop = function(abord) {
-        clearTimeout(this.nowTimeout);
-        if(abord)
+        clearInterval(this.timer);
+        if(abord) {
             this.running = false;
+            this.eventFire("Code.stop", this);
+        } else {
+            // not abord => pause
+            this.eventFire("Code.pause", this);
+        }
     };
 
     
@@ -105,16 +128,28 @@
      * Code one step action
      * @return {boolean} code stopped:false, continue:true
      */
-    $jb.Code.step : function() {
+    $jb.Code.prototype.step = function() {
+        this.eventFire("Code.beforeStep", this);
+        var val = this._step();
+        this.eventFire("Code.step", this);
+        this.eventFire("Code.afterStep", this);
+        return val;
+    }
+    
+    /**
+     * Code one step action practical use function
+     * @return {boolean} code stopped:false, continue:true
+     */
+    $jb.Code.prototype._step = function() {
         if(!this.running) return false; // code running check
         
         // string command
         if(this.strings) {
             if(this.c != '"') {
-                Stack.Push(this.c.charCodeAt(0));
-                this.Next();
+                this.Stack.push( this.c.charCodeAt(0) );
+                this.next();
             } else {
-                this.Next();
+                this.next();
                 this.strings = false;
             }
             
@@ -147,7 +182,7 @@
                 this.direction = 8;
                 break;
             case '_': case '|':
-                var d = this.Stack.Pop();
+                var d = this.Stack.pop();
                 this.direction = this.c == '_' ? (d == 0 ? 6 : 4) : (d == 0 ? 2 : 8)
                 break;
             case '?':
@@ -159,7 +194,7 @@
             case '3': case '4': case '5':
             case '6': case '7': case '8':
             case '9':
-                this.Stack.Push( parseInt(this.c) );
+                this.Stack.push( parseInt(this.c) );
                 break;
             
             case '"':
@@ -169,18 +204,18 @@
                 
             // user input
             case '&':
-                this.Stack.Push( String.fromCharCode(this.InputBuffer.Get()) );
+                this.Stack.push( String.fromCharCode(this.InputBuffer.get()) );
                 break;
             case '~':
-                this.Stack.Push( this.InputBuffer.Get() );
+                this.Stack.push( this.InputBuffer.get() );
                 break;
                 
             // output    
             case '.':
-                this.Result.Add( this.Stack.Pop() + ' ' );
+                this.Result.add( this.Stack.pop() + ' ' );
                 break;
             case ',':
-                this.Result.Add( String.fromCharCode(this.Stack.Pop()) );
+                this.Result.add( String.fromCharCode(this.Stack.pop()) );
                 break;
                 
             // calc
@@ -189,53 +224,53 @@
             case '*':
             case '/':
             case '%':
-                var a = this.Stack.Pop();
-                var b = this.Stack.Pop();
-                this.Stack.Push( eval("(" + b + ")" + this.c + "(" + a + ")") );
+                var a = this.Stack.pop();
+                var b = this.Stack.pop();
+                this.Stack.push( eval("(" + b + ")" + this.c + "(" + a + ")") );
                 break;
                 
             case '`':
-                var n = this.Stack.Pop();
-                this.Stack.Push( this.Stack.Pop() > n ? 1 : 0 );
+                var n = this.Stack.pop();
+                this.Stack.push( this.Stack.pop() > n ? 1 : 0 );
                 break;
             case '!':
-                this.Stack.Push( this.Stack.Pop() ? 0 : 1 );
+                this.Stack.push( this.Stack.pop() ? 0 : 1 );
                 break;
                 
             // stack
             case ':':
-                var n = this.Stack.Pop();
-                this.Stack.Push(n);
-                this.Stack.Push(n);
+                var n = this.Stack.pop();
+                this.Stack.push(n);
+                this.Stack.push(n);
                 break;
                 
             case "\\":
-                var a = this.Stack.Pop();
-                var b = this.Stack.Pop();
-                this.Stack.Push(a);
-                this.Stack.Push(b);
+                var a = this.Stack.pop();
+                var b = this.Stack.pop();
+                this.Stack.push(a);
+                this.Stack.push(b);
                 break;
                 
             case '$':
-                this.Stack.Pop();
+                this.Stack.pop();
                 break;
                     
             case 'g':
-                var y = this.Stack.Pop();
-                var x = this.Stack.Pop();
+                var y = this.Stack.pop();
+                var x = this.Stack.pop();
                 var v = this.source[y].charCodeAt(x);
-                this.Stack.Push(v);
+                this.Stack.push(v);
                 break;
                 
             case 'p':
-                var y = this.Stack.Pop();
-                var x = this.Stack.Pop();
-                var v = this.Stack.Pop();
+                var y = this.Stack.pop();
+                var x = this.Stack.pop();
+                var v = this.Stack.pop();
                 this.source[y] =
                     this.source[y].substring(0, x)
                     + String.fromCharCode(v)
                     + (x+1 == this.source[y].length ? '' : this.source[y].substring(x+1, this.source[y].length));
-                this.UpdateTable(x,y, String.fromCharCode(v));
+                this.eventFire("Code.change", this, [x,y,v]);
                 break;
                 
             // nop
@@ -250,43 +285,20 @@
             default:
                 break;
         }
-        this.Next();
+        this.next();
         return true;
     };
     
-    /*        
-        // code settings
-        var Code = {
-            runDelay : 1, // millisecconds, use "setTimeout"
-        };
-        
-        // management befunge code
-        Code = $.extend(Code, {           
-            MakeTable : function() {
-                $(BefungeElements.RunCode).text("");
-                for(var i=0, ymax=this.source.length; i<ymax; i++) {
-                    var tr = $("<tr>");
-                    for(var j=0, xmax=this.source[i].length; j<xmax; j++) {
-                        tr.append(
-                            $("<td>").text(this.source[i].substr(j,1))
-                        );
-                    }
-                    $(BefungeElements.RunCode).append(tr);
-                }
-                $(BefungeElements.RunCode + ' td').dblclick(function(){
-                    $(this).toggleClass("break");
-                });
-            },
-            UpdateTable : function(x,y, character) {
-                $(BefungeElements.RunCode + " tr:eq(" + y  + ") td:eq(" + x + ")")
-                    .text(character);
-            },
-            MoveTable : function(remove) {
-                $(BefungeElements.RunCode + " tr:eq(" + this.pos[1]  + ") td:eq(" + this.pos[0] + ")")
-                    .toggleClass("now", !remove);
-            },
-        });
+    /**
+     * Event fire function
+     * @param {string} Event target
+     * @param {object} "this" object
+     * @param {Array<object>} args in event funcs
+     */
+    $jb.Code.prototype.eventFire = function(target, _this, args){
+        this._event.fire(target, _this, args);
+        $jb.Event.fire(target, _this, args);
     };
-    */
     
-})(jqBefunge);
+    
+})(jsBefunge);
