@@ -270,6 +270,7 @@
                     this.source[y].substring(0, x)
                     + String.fromCharCode(v)
                     + (x+1 == this.source[y].length ? '' : this.source[y].substring(x+1, this.source[y].length));
+                this.eventFire("Code.change", this, [x,y,v]);
                 break;
                 
             // nop
