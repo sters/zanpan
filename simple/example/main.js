@@ -123,6 +123,10 @@
                         });
                         onCodePositionChanged();
                     });
+                    
+                    _befunge._event.on("Code.change", function(t, v){
+                        $("#" + _elementIDs.RunCode + " tr:eq(" + v[1]  + ") td:eq(" + v[0] + ")").text(v[2]);
+                    });
                 }
             },
             
