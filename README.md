@@ -12,15 +12,6 @@ _Description: "Befunge" interpreter in javascript_
 This project don't have major test programs.
 Use src/test/_simple_test.js
 
-## Contributing changes
-
-- _Internal git workflow_
-- _Pull request guidelines_
-- _Tracker project_
-- _Google group_
-- _irc channel_
-- _"Please open github issues"_
-
 ## License
 
 GPL v3
